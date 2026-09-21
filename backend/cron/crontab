@@ -1,0 +1,2 @@
+# Alternative to the scheduler container: run the daily job at 02:00 UTC from any host/container with the app installed.
+0 2 * * * cd /app && PYTHONPATH=/app/backend python -m app.pipeline.daily_job >> /var/log/parline-daily.log 2>&1

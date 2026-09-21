@@ -1,0 +1,6 @@
+**/node_modules
+**/.next
+frontend
+report/figures
+**/__pycache__
+.git

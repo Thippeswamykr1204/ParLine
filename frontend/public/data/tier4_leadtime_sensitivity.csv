@@ -1,0 +1,4 @@
+policy,total_stockout_days,stockout_rate_pct,total_lost_volume_ml,avg_holding_ml_per_series,total_holding_ml_across_series,avg_turnover_ratio,total_orders_placed
+Global ML (99% SL) @ L=2d,263,3.7,49379.5,430.7,41351.0,8.228,1087
+Global ML (99% SL) @ L=3d,182,2.56,35394.8,535.8,51439.1,6.9,1092
+Global ML (99% SL) @ L=5d,128,1.8,24917.9,708.5,68017.7,5.399,1107

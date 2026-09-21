@@ -1,0 +1,53 @@
+# `docker-compose up --build` brings up Postgres + the FastAPI app (migrate + seed on first boot).
+# Optional daily scheduler:  docker-compose --profile scheduler up --build
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: parline
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-parline}
+      POSTGRES_DB: parline
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parline -d parline"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment: &appenv
+      DATABASE_URL: postgresql+psycopg2://parline:${POSTGRES_PASSWORD:-parline}@db:5432/parline
+      API_KEY: ${API_KEY:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      SEED_ON_START: "true"
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      AGENT_MODEL: ${AGENT_MODEL:-}
+    volumes:
+      - ./data/incoming:/app/data/incoming     # drop new raw-log CSV/XLSX files here for the daily job
+    ports:
+      - "8000:8000"
+
+  scheduler:
+    profiles: ["scheduler"]
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+    environment: *appenv
+    volumes:
+      - ./data/incoming:/app/data/incoming
+    command: ["python", "-m", "app.pipeline.scheduler"]
+
+volumes:
+  pgdata:

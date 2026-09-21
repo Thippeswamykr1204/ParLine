@@ -1,0 +1,6 @@
+policy,total_stockout_days,stockout_rate_pct,total_lost_volume_ml,avg_holding_ml_per_series,total_holding_ml_across_series,avg_turnover_ratio,total_orders_placed
+Global ML (99% SL),263,3.7,49379.5,430.7,41351.0,8.228,1087
+Moving Average (95% SL),426,6.0,80794.5,328.2,31503.8,9.723,1050
+Holt-Winters (95% SL),477,6.71,89487.9,316.3,30364.9,10.038,1036
+Global ML (95% SL),496,6.98,90945.7,312.6,30005.5,10.081,1032
+Naive (fixed qty),584,8.22,127603.8,258.1,24773.8,10.257,602
