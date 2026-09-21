@@ -11,5 +11,5 @@ COPY backend /app/backend
 RUN mkdir -p /app/report/figures /app/data/incoming
 EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=90s --retries=5 \
-  CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/v1/health').status==200 else 1)"
-CMD ["sh", "-c", "python -m app.bootstrap && exec uvicorn app.api.main:app --host 0.0.0.0 --port 8000"]
+  CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:%s/api/v1/health' % __import__('os').environ.get('PORT','8000')).status==200 else 1)"
+CMD ["sh", "-c", "python -m app.bootstrap && exec uvicorn app.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

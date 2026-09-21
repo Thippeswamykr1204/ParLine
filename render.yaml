@@ -1,0 +1,47 @@
+# Render Blueprint: New + > Blueprint > pick this repo. Creates Postgres + API (Docker) + web (Next.js).
+# Plans are "free" so the demo costs nothing; see DEPLOY.md for free-tier caveats.
+databases:
+  - name: parline-db
+    databaseName: parline
+    user: parline
+    region: singapore
+    plan: free
+
+services:
+  - type: web
+    name: parline-api
+    runtime: docker
+    region: singapore
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: parline-db
+          property: connectionString
+      - key: SEED_ON_START
+        value: "true"
+      - key: API_KEY            # protects POST /pipeline/run, /forecast, /simulate (the UI does not need it)
+        generateValue: true
+      - key: CORS_ORIGINS       # set to the web URL, e.g. https://parline-web.onrender.com (no trailing slash)
+        sync: false
+      - key: GROQ_API_KEY       # free key from https://console.groq.com/keys
+        sync: false
+
+  - type: web
+    name: parline-web
+    runtime: node
+    region: singapore
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_PUBLIC_DATA_SOURCE
+        value: api
+      - key: NEXT_PUBLIC_API_BASE_URL   # the API's public URL, e.g. https://parline-api.onrender.com
+        sync: false

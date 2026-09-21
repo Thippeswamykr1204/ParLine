@@ -2,9 +2,16 @@ import os
 from pathlib import Path
 
 PROJECT_ROOT = Path(os.environ.get("PROJECT_ROOT", Path(__file__).resolve().parents[2]))
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql+psycopg2://parline:parline@localhost:5432/parline")
+def _normalise_db_url(url: str) -> str:
+    """Render/Heroku-style URLs (postgres:// or postgresql://) -> SQLAlchemy's psycopg2 dialect."""
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg2://" + url[len(prefix):]
+    return url
+
+DATABASE_URL = _normalise_db_url(os.environ.get("DATABASE_URL", "postgresql+psycopg2://parline:parline@localhost:5432/parline"))
 API_KEY = os.environ.get("API_KEY", "")  # empty = auth disabled (dev). Protects mutating/heavy endpoints only.
-CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
+CORS_ORIGINS = [o.strip().rstrip("/") for o in os.environ.get("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
 INCOMING_DIR = Path(os.environ.get("INCOMING_DIR", PROJECT_ROOT / "data" / "incoming"))
 KEEP_RUNS = int(os.environ.get("KEEP_RUNS", "14"))          # forecast/par/sim rows retained per run; metrics kept forever
 MAX_INVALID_PCT = float(os.environ.get("MAX_INVALID_PCT", "5"))  # abort the daily job above this % of bad rows
